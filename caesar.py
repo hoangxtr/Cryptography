@@ -32,7 +32,7 @@ def encrypt(plaint_text, key):
     
     return cipher
 
-def score(plaint_text):
+def score1(plaint_text):
     _score = 0
     plaint_text = str.lower(plaint_text)
     for i, letter in enumerate(ONE_LETTERS):
@@ -44,21 +44,43 @@ def score(plaint_text):
     
     return _score
 
+def score2(plaint_text):
+    _score = 0
+    plaint_text = str.lower(plaint_text)
+    # for i, letter in enumerate(ONE_LETTERS):
+    #     _score += plaint_text.count(letter) * ((len(ONE_LETTERS) - i) / len(ONE_LETTERS)) / 4
+    
+    for i, list_words in enumerate([TWO_LETTERS, THREE_LETTERS, FOUR_LETTERS]):
+        for word in list_words:
+            _score += plaint_text.count(word) * (i + 1) / 3
+    
+    return _score
+
 def decrypt_without_key(cipher):
+    ret = {}
+    rets = []
     plaintexts = []
     scores = []
-    for key in range(1, 26):
+    for key in range(26):
         plaintext = decrypt(cipher, key)
         plaintexts.append(plaintext)
-        scores.append(score(plaintexts[-1]))
-        print('\n{0}:{1}'.format(plaintext, scores[-1]))
-    print('Cipher max: \n{0}'.format(plaintexts[np.argmax(scores)]))
+        _score = score2(plaintexts[-1])
+        scores.append(_score)
+        rets.append({'key': key, 'score': _score, 'plaintext': plaintext})
+
+    # print(rets)
+    rets = sorted(rets, key=lambda d: d['score'], reverse=True)
+    print('Decode with Caesar with score:')
+    for i in range(len(rets)):
+        print('{0}'.format(rets[i]))
+    print('Candidate max: {0}'.format(plaintexts[np.argmax(scores)]))
+    return rets[0]
     
 
 
 
-plaintext = 'Note that, in some cases, effort can be shared between ciphers. For example, the Vigenère and autokey ciphers are identical for the beginning of the message; they only start to behave differently when the end of the keyword is reached. It may also be a good idea to try simple variants of these ciphers, such as switching the encryption and decryption rules around; some of them work equally well in both directions, and may have been used so.'.lower()
+plaintext = 'I am a student at Ho Chi Minh University of Technology'.lower()
 cipher = encrypt(plaintext, ord('a') - ord('s') + 26)
-print('cipher: ', cipher)
+print('Cipher: {0}\n'.format(cipher))
 
-decrypt_without_key(cipher)
+print(decrypt_without_key(cipher))
